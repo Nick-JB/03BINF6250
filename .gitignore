@@ -1,9 +1,6 @@
 # --- Genomic & Alignment Data ---
 # Ignores the heavy data files in your project folder
-project03/data/*.fna
-project03/data/*.bam
-project03/data/*.bai
-project03/data/*.gff
+project03/data
 
 # --- Python & Environment ---
 # Keeps your local environment out of the cloud
