@@ -5,7 +5,11 @@ Description of the project
 Put pseudocode in this box:
 
 ```
-Some pseudocode here
+1. Initizalize random number generator
+
+2. Randomly initialize one motif occurence per sequence
+- for each sequence, choose a random start position
+
 ```
 
 # Successes
