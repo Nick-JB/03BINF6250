@@ -2,8 +2,6 @@ import random
 import numpy as np
 import bamnostic as bs
 import seqlogo as sl
-import shutil
-sl.seqlogo.shutil = shutil
 
 #import function for building sequence motif & idenfitying seqs matching to motif
 from data_readers import *
