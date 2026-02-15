@@ -13,8 +13,8 @@ Put pseudocode in this box:
 ```
 
 # Successes
-Successfully implemented Gibbs Sampler
-Generated a meaningful seqlogo that matches our expected results
+- Successfully implemented Gibbs Sampler
+- Generated a meaningful seqlogo that matches our expected results
 
 # Struggles
 Handling large datasets and determining how to approach testing and building model
@@ -27,7 +27,7 @@ This assignment came with many new hurdles that we had not previously had much e
 
 # Personal Reflections
 ## Group Leader
-Group leader's reflection on the project
+Fardina Tabassum- It was a bit confusing at first to figure out which files to work with and what sort of information each file has, and what it is used for does but after reviewing the lecture and consulting with my group members, I was able to learn about them. It was also hard to understand how many times to iterate so that the program would not be computationally intensive. We also had issues displaying the seqlogo. It was my first time working with a large dataset, so I found it a bit challenging as the run times were very long, and it took a lot of time to debug the code. We combatted this by using text sequences and fewer iterations to check if the code was working first. Working with MACS2 was a bit frustrating for me to install at first, but my teammates helped me figure it out. We made multiple attempts using the p-53 dataset to generate motifs at first, but we were unable to resolve seeing AT biases in our reads. We then decided to switch over to the bacteria dataset, and we found out that our sampler does indeed work so that was a relief. Overall my team was very accommodating to my lack of understanding and helped me with a lot of the code clarification. They were able to dedicate a good amount of time to this project, trying different code logic to get the dataset to work. We were able to meet and collaborate engagingly so I am thankful for having such a dedicated team. This project really tested my understanding of algorithms and made me realize how important it is to understand the biological context as well. It also gave me an insight into how researchers work when they have unknown datasets and how frustrating it is, as we don't know what result to expect. 
 
 ## Other member
 Tien Nguyen- In this project, I implemented the Gibbs Motif Finder algorithm, which challenged me to understand the basic principles of motif discovery and how the provided functions worked together. Although it was difficult at first, the process helped strengthen my problem-solving and algorithmic thinking skills. After being given extra time, I explored ChIP-seq analysis using MACS2, bedtools, and MEME to identify DNA motifs from sequencing data. This experience improved my confidence in using bioinformatics tools and helped me connect computational methods with biological interpretation.
