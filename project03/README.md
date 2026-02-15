@@ -1,5 +1,9 @@
 # Introduction
-Description of the project
+This project implements a Gibbs Sampler, a stochastic (randomized) algorithm used to identify conserved DNA patterns (motifs) within a set of sequences. The goal is to discover biological signals that are hidden within genomic noise. It does this by iteratively refining motif position predictions by building probabilistic models from sequence alignments.
+
+The Evolution of the Project:
+Initially, this project focused on identifying the binding site for the p53 tumor suppressor protein using human ChIP-seq data, but due to unsuccessful attempts, we switched to a bacterial dataset to verify the accuracy of our algorithm
+
 
 # Pseudocode
 Put pseudocode in this box:
@@ -14,7 +18,7 @@ Put pseudocode in this box:
 
 # Successes
 - Successfully implemented Gibbs Sampler
-- Generated a meaningful seqlogo that matches our expected results
+-  Generated a meaningful seqlogo that matches our expected results
 
 # Struggles
 Handling large datasets and determining how to approach testing and building model
