@@ -84,5 +84,5 @@ Nicholas Bottomley- This assignment came with many new hurdles that we had not p
 Tien Nguyen- In this project, I implemented the Gibbs Motif Finder algorithm, which challenged me to understand the basic principles of motif discovery and how the provided functions worked together. Although it was difficult at first, the process helped strengthen my problem-solving and algorithmic thinking skills. After being given extra time, I explored ChIP-seq analysis using MACS2, bedtools, and MEME to identify DNA motifs from sequencing data. This experience improved my confidence in using bioinformatics tools and helped me connect computational methods with biological interpretation.
 
 # Generative AI Appendix
-Anthropic. (2025). Claude Sonnet 4.6 [Large language model]. https://www.anthropic.com
+Anthropic. (2025). Claude Sonnet 4.6 [Large language model]. https://www.anthropic.com 
 Claude was used to understand the biological context behind the datasets. Additionally, Claude was used to help with install and use of file conversion packages, such as macs2 and bedtools.
