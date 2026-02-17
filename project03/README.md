@@ -6,14 +6,40 @@ Initially, this project focused on identifying the binding site for the p53 tumo
 
 
 # Pseudocode
-Put pseudocode in this box:
+Pseudocode for processing the Baterial Dataset
 
 ```
-1. Initizalize random number generator
+1. INITIALIZE ENVIRONMENT
+   - Load NumPy, Seqlogo, and parser functions
+   - Load utility functions for k-mer extraction and other helper functions
 
-2. Randomly initialize one motif occurrence per sequence
-- for each sequence, choose a random start position
+2. PRE-PROCESS DATA
+   - Open B. subtilis genomic FASTA and GFF files.
+   - For each entry marked as a 'Coding Sequence' (CDS):
+     - Extract the 50bp sequence immediately upstream (the promoter).
+     - Check if sequence contains "AGGAGG".
+     - Add matching sequences to a master list.
 
+3. INITIALIZE GIBBS SAMPLER
+    - For every sequence in the list:
+    - Randomly select a 10bp window (motif) as a starting point.
+    - Define background noise (monocharacter sequences) to ignore.
+
+4. SAMPLING LOOP (50,000 Iterations)
+   - Pick one sequence from the list at random.
+   - Temporarily remove its motif from the current model.
+   - Build a Position Frequency Matrix (PFM) from all OTHER sequences.
+   - Convert PFM to a Weight Matrix (PWM) with pseudocounts.
+   - Generate all possible 10bp windows (k-mers) in the picked sequence.
+   - Score each window against the PWM.
+   - Probabilistically select a NEW window based on its score (using log2 transform).
+   - Update the master list with the new window.
+
+5. OUTPUT & VISUALIZATION
+   - Take the final PFM and transpose it.
+   - Convert counts into probabilities (Normalization).
+   - Scale the height of letters based on Information Content (bits).
+   - Render and display the final Sequence Logo.
 ```
 
 # Successes
@@ -21,7 +47,7 @@ Put pseudocode in this box:
 -  Generated a meaningful seqlogo that matches our expected results
 
 # Struggles
-Handling large datasets and determining how to approach testing and building model
+Handling large datasets and determining how to approach testing and building models
 Understanding data transformations
 Seqlogo dependencies
 Installing MACS2
