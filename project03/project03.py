@@ -3,42 +3,32 @@ import numpy as np
 import bamnostic as bs
 import seqlogo as sl
 
-#Import function for building sequence motif & identifying seqs matching to motif
-from data_readers import get_fasta, get_gff
+#import function for building sequence motif & idenfitying seqs matching to motif
+from data_readers import *
 from seq_ops import get_seq
-from motif_ops import build_pfm, build_pwm, score_kmer, pfm_ic
+from motif_ops import *
 
-bam_path = "data/SRR9090854.subsampled_5pct.bam"
+def get_kmers(seq, k):
+    kmer_seqs = []
+    seq_rev = reverse_complement(seq)
+    for ind in range(0, len(seq) - (k-1)):
+        kmer_seqs.append(seq[ind:ind+k])
+        kmer_seqs.append(seq_rev[ind:ind+k])
 
-seqs = [read.seq for read in bs.AlignmentFile(bam_path)]
+    return kmer_seqs
 
-# --- DATA PREPARATION CELL ---
+def log2_weight_transform(scores):
+    for ind, score in enumerate(scores):
+        scores[ind] = 2**score
 
-# Define paths
-fasta_file = "data/GCF_000009045.1_ASM904v1_genomic.fna"
-gff_file = "data/GCF_000009045.1_ASM904v1_genomic.gff"
+    return scores
 
-# Extract the chromosome sequence
-header, genome_seq = next(get_fasta(fasta_file))
 
-# extract the 50bp promoter sequences for every gene
-seqs = []
-for entry in get_gff(gff_file):
-    if entry.type == 'gene':
-        # get_seq comes from your seq_ops.py module
-        promoter = get_seq(genome_seq, entry.start, entry.end, entry.strand, size=50)
-
-        #only add if we got a valid 50bp sequence
-        if promoter and len(promoter) == 50:
-            seqs.append(promoter)
-
-print(f"Successfully loaded {len(seqs)} sequences into the 'seqs' variable.")
-
-def GibbsMotifFinder (seqs, k, seed=42):
+def GibbsMotifFinder (seqs, k, seed=None):
     '''
     Function to find a pfm from a list of strings using a Gibbs sampler
-
-    Args:
+    
+    Args: 
         seqs (str list): a list of sequences, not necessarily in same lengths
         k (int): the length of motif to find
         seed (int, default=None): seed for np.random
@@ -46,74 +36,63 @@ def GibbsMotifFinder (seqs, k, seed=42):
     Returns:
         pfm (numpy array): dimensions are 4xlength
     '''
+    monocharacter_seqs = {"A"*k, "C"*k, "T"*k, "G"*k}
     # Use rng to make random samples/selections/numbers
     # Example: randint = rng.integer(1, 10)
-
-    # random.seed(seed)
-    # rng = np.random.default_rng(seed)
-
+    random.seed(seed)
     rng = np.random.default_rng(seed)
-    n_seqs = len(seqs)
 
-    # Initialization: picking random start positions
-    current_indices = [rng.integers(0, len(s) - k + 1) for s in seqs]
+    # Get initial motifs for pfm
+    motifs = []
+    for seq in seqs:
+        randint = random.randint(0, len(seq) - k)
+        motifs.append(seq[randint:randint+k])
 
-    best_pfm = None
-    max_ic = -float('inf')
+    for _ in range(50000):
+        rand_seq_ind = random.randint(0, len(seqs)-1)
+        rand_seq = seqs[rand_seq_ind]
 
-    # Main Loop: Run for a set number of iterations
-    for _ in range(100): 
-        # pick a random sequence to leave out
-        i = rng.integers(0, n_seqs)
+        kmer_seqs = get_kmers(rand_seq, k)
 
-        # build model from all other sequences
-        other_kmers = []
-        for idx, s in enumerate(seqs):
-            if idx != i:
-                start = current_indices[idx]
-                other_kmers.append(s[start : start + k])
-
-        pfm = build_pfm(other_kmers, k)
+        pfm = build_pfm(motifs, k)
         pwm = build_pwm(pfm)
 
-        # Score & Sample for the left-out sequence
-        seq_i = seqs[i]
-        weights = []
-        for j in range(len(seq_i) - k + 1):
-            kmer = seq_i[j : j + k]
-            score = score_kmer(kmer, pwm)
-            weights.append(2.0 ** score) # Convert log2 score back to weight
+        valid_kmers = []
+        kmer_scores = []
 
-        # Normalize weights into probabilities
-        weights = np.array(weights)
-        probs = weights / weights.sum()
+        for kmer in kmer_seqs:
+            if kmer in monocharacter_seqs:
+                continue
+            kmer_scores.append(score_kmer(kmer, pwm))
+            valid_kmers.append(kmer)
 
-        # Choose new index based on probability distribution
-        current_indices[i] = rng.choice(len(probs), p=probs)
+        weights = log2_weight_transform(kmer_scores)
+        
 
-        # Evaluate
-        all_kmers = [seqs[idx][pos : pos + k] for idx, pos in enumerate(current_indices)]
-        current_pfm = build_pfm(all_kmers, k)
-        current_ic = pfm_ic(current_pfm)
+        new_motif = random.choices(valid_kmers, weights=weights)[0]
+        motifs[rand_seq_ind] = new_motif
+        if _ % 2000 == 0:
+            print(len(kmer_seqs))
+            print(f"Iteration {_} IC Score: {pfm_ic(pfm)}", end="\n"*2)
+    print(new_motif)
+    return pfm
 
-        if current_ic > max_ic:
-            max_ic = current_ic
-            best_pfm = current_pfm
 
-    return best_pfm
+if __name__ == "__main__":
+    seq_file="data/GCF_000009045.1_ASM904v1_genomic.fna"
+    gff_file="data/GCF_000009045.1_ASM904v1_genomic.gff"
 
-    pass
+    seqs = []
+    for name, seq in get_fasta(seq_file):
+        for gff_entry in get_gff(gff_file):
+            if gff_entry.type == 'CDS':
+                promoter_seq = get_seq(seq, gff_entry.start, gff_entry.end, gff_entry.strand, 50)
+                if "AGGAGG" in promoter_seq:
+                    seqs.append(promoter_seq)
 
-# Run the gibbs sampler:
-promoter_pfm = GibbsMotifFinder(seqs,10 )
+    # Run the gibbs sampler:
+    promoter_pfm = GibbsMotifFinder(seqs, 10)
+    print(promoter_pfm)
 
-# Plot the final pfm that is generated
-
-# Create the logo data
-logo_data = sl.CompletePm(pfm=promoter_pfm.T)
-
-# Save the logo to a file instead of trying to display it
-sl.seqlogo(logo_data, filename='motif_results.pdf', format='pdf')
-
-print("Success! Your motif logo has been saved as 'motif_results.pdf'")
-
+    # Plot the final pfm that is generated: 
+    #sl.seqlogo(sl.CompletePm(pfm = promoter_pfm.T), format='pdf')
