@@ -4,7 +4,22 @@ This project implements a Gibbs Sampler, a stochastic (randomized) algorithm use
 The Evolution of the Project:
 Initially, this project focused on identifying the binding site for the p53 tumor suppressor protein using human ChIP-seq data and then later refining the data using peak calling, but due to unsuccessful attempts, we switched to a bacterial dataset to verify the accuracy of our algorithm
 
+# BAM to FASTA Workflow  
+```
+# Get peaks from bam file
+macs2 callpeak -t SRR9090854.subsampled_5pct.bam -f BAMPE -n p53_study -g hs -q 0.01
 
+# Take peak summits and expand start and end positions by 50bp in each direction
+bedtools slop -i p53_study_summits.bed -g <List of chromosomes and corresponding sizes in txt file> -b 50 > p53_study_peaks100.bed
+
+# Convert chromosome names in bed file to agree with NCBI chromosome naming convention in GRCh38.p14 FASTA
+awk 'BEGIN {OFS="\t"} NR==FNR {map[$1]=$2; next} \
+{chr=$1; gsub(/^chr/, "", chr); if (chr in map) {$1=map[chr]; print}}' \
+bed/chr_mapping.txt p53_study_peaks_100.bed > output.bed
+
+# Convert bed file to FASTA based on NCBI GRCh38.p14 FASTA
+bedtools getfasta -fi <Human Genome FASTA file> 
+```
 # Pseudocode
 Pseudocode for processing the Bacterial Dataset
 
@@ -69,4 +84,5 @@ Nicholas Bottomley- This assignment came with many new hurdles that we had not p
 Tien Nguyen- In this project, I implemented the Gibbs Motif Finder algorithm, which challenged me to understand the basic principles of motif discovery and how the provided functions worked together. Although it was difficult at first, the process helped strengthen my problem-solving and algorithmic thinking skills. After being given extra time, I explored ChIP-seq analysis using MACS2, bedtools, and MEME to identify DNA motifs from sequencing data. This experience improved my confidence in using bioinformatics tools and helped me connect computational methods with biological interpretation.
 
 # Generative AI Appendix
-Claude was used to understand the biological context behind the datasets.
+Anthropic. (2025). Claude Sonnet 4.6 [Large language model]. https://www.anthropic.com  
+Claude was used to understand the biological context behind the datasets. Additionally, Claude was used to help with install and use of file conversion packages, such as macs2 and bedtools.
